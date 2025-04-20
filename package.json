@@ -1,4 +1,13 @@
 {
+  "name": "ensa-planner",
+  "version": "1.0.0",
+  "description": "Application de planification pour les étudiants de l'ENSA",
+  "scripts": {
+    "start": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "cd backend && npm run dev",
+    "client": "cd frontend && npm start",
+    "install-all": "npm install && cd backend && npm install && cd ../frontend && npm install"
+  },
   "dependencies": {
     "@fullcalendar/core": "^6.1.17",
     "@fullcalendar/daygrid": "^6.1.17",
@@ -6,5 +15,8 @@
     "@fullcalendar/react": "^6.1.17",
     "@fullcalendar/timegrid": "^6.1.17",
     "googleapis": "^148.0.0"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
   }
 }

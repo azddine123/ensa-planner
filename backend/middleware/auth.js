@@ -2,17 +2,31 @@ const jwt = require('jsonwebtoken');
 
 const auth = (req, res, next) => {
   try {
-    const token = req.header('Authorization')?.replace('Bearer ', '');
+    const authHeader = req.header('Authorization');
+    
+    if (!authHeader) {
+      return res.status(401).json({ message: 'Token non fourni' });
+    }
+    
+    const token = authHeader.replace('Bearer ', '');
     
     if (!token) {
       return res.status(401).json({ message: 'Token non fourni' });
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded;
-    next();
+    try {
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      req.user = decoded;
+      next();
+    } catch (error) {
+      if (error.name === 'TokenExpiredError') {
+        return res.status(401).json({ message: 'Token expiré', error: 'token_expired' });
+      }
+      return res.status(401).json({ message: 'Token invalide', error: error.message });
+    }
   } catch (error) {
-    res.status(401).json({ message: 'Token invalide' });
+    console.error('Erreur d\'authentification:', error);
+    res.status(500).json({ message: 'Erreur serveur d\'authentification', error: error.message });
   }
 };
 

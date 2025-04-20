@@ -1,17 +1,18 @@
 const jwt = require('jsonwebtoken');
 const Admin = require('../models/Admin');
 const Student = require('../models/Student');
+const { logAccess, logError, logDebug } = require('../utils/logger');
 
 const authController = {
   // Connexion d'un utilisateur
   login: async (req, res) => {
     try {
-      console.log('Tentative de connexion avec:', req.body);
+      logDebug('Tentative de connexion avec: ' + JSON.stringify(req.body));
       const { email, password, role } = req.body;
 
       // Vérification du format de l'email
       if (!/^[a-zA-Z0-9._%+-]+@usms\.ac\.ma$/.test(email)) {
-        console.log('Format email invalide');
+        logDebug(`Format email invalide: ${email}`);
         return res.status(400).json({ message: 'L\'email doit être sous la forme exemple@usms.ac.ma' });
       }
 
@@ -21,16 +22,16 @@ const authController = {
       // Vérification de l'utilisateur
       const user = await Model.findOne({ email });
       if (!user) {
-        console.log('Utilisateur non trouvé:', email);
+        logDebug(`Utilisateur non trouvé: ${email}`);
         return res.status(401).json({ message: 'Email ou mot de passe incorrect' });
       }
 
-      console.log('Utilisateur trouvé:', user.email, 'Role:', user.role);
+      logDebug(`Utilisateur trouvé: ${user.email}, Role: ${user.role}`);
 
       // Vérification du mot de passe
       const isMatch = await user.comparePassword(password);
       if (!isMatch) {
-        console.log('Mot de passe incorrect pour:', email);
+        logDebug(`Mot de passe incorrect pour: ${email}`);
         return res.status(401).json({ message: 'Email ou mot de passe incorrect' });
       }
 
@@ -41,7 +42,7 @@ const authController = {
         { expiresIn: '24h' }
       );
 
-      console.log('Connexion réussie pour:', email);
+      logAccess(`Connexion réussie pour: ${email}, role: ${user.role}`);
 
       res.json({
         token,
@@ -62,7 +63,7 @@ const authController = {
         }
       });
     } catch (error) {
-      console.error('Erreur de connexion:', error);
+      logError('Erreur de connexion', error);
       res.status(500).json({ message: 'Erreur serveur', error: error.message });
     }
   },
@@ -70,24 +71,29 @@ const authController = {
   // Création d'un nouvel utilisateur (admin seulement)
   createUser: async (req, res) => {
     try {
-      const { email, password, role, firstName, lastName } = req.body;
+      const { email, password, role, firstName, lastName, ...otherFields } = req.body;
+
+      // Choisir le bon modèle en fonction du rôle
+      const Model = role === 'admin' ? Admin : Student;
 
       // Vérification si l'utilisateur existe déjà
-      const existingUser = await User.findOne({ email });
+      const existingUser = await Model.findOne({ email });
       if (existingUser) {
         return res.status(400).json({ message: 'Cet email est déjà utilisé' });
       }
 
       // Création du nouvel utilisateur
-      const user = new User({
+      const user = new Model({
         email,
         password,
         role,
         firstName,
-        lastName
+        lastName,
+        ...otherFields
       });
 
       await user.save();
+      logAccess(`Nouvel utilisateur créé: ${email}, role: ${role}`);
 
       res.status(201).json({
         message: 'Utilisateur créé avec succès',
@@ -100,7 +106,8 @@ const authController = {
         }
       });
     } catch (error) {
-      res.status(500).json({ message: 'Erreur serveur' });
+      logError('Erreur lors de la création d\'utilisateur', error);
+      res.status(500).json({ message: 'Erreur serveur', error: error.message });
     }
   }
 };

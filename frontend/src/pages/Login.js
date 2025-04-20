@@ -1,17 +1,43 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import config from '../config';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  // Validation de l'email avec le format USMS
+  const validateEmail = (email) => {
+    const regex = /^[a-zA-Z0-9._%+-]+@usms\.ac\.ma$/;
+    return regex.test(email);
+  };
 
   const handleSubmit = async (e, role) => {
     e.preventDefault();
+    setError('');
+    
+    // Validation des champs avant envoi
+    if (!email || !password) {
+      setError('Veuillez remplir tous les champs');
+      return;
+    }
+
+    // Validation du format de l'email
+    if (!validateEmail(email)) {
+      setError('Format d\'email invalide. Utilisez le format exemple@usms.ac.ma');
+      return;
+    }
+
     try {
-      const response = await axios.post('http://localhost:5000/api/auth/login', {
+      setLoading(true);
+      
+      console.log(`Tentative de connexion avec: ${email}, rôle: ${role}`);
+      
+      const response = await axios.post(`${config.API_URL}/auth/login`, {
         email,
         password,
         role
@@ -19,15 +45,32 @@ const Login = () => {
 
       if (response.data.user.role !== role) {
         setError(`Vous n'avez pas les droits d'accès en tant que ${role === 'admin' ? 'administrateur' : 'étudiant'}`);
+        setLoading(false);
         return;
       }
 
-      localStorage.setItem('token', response.data.token);
-      localStorage.setItem('user', JSON.stringify(response.data.user));
+      localStorage.setItem(config.AUTH_TOKEN_KEY, response.data.token);
+      localStorage.setItem(config.USER_DATA_KEY, JSON.stringify(response.data.user));
 
-      navigate(role === 'admin' ? '/admin' : '/student');
+      console.log(`Connexion réussie pour: ${email}`);
+      
+      navigate(role === 'admin' ? config.ROUTES.ADMIN_DASHBOARD : config.ROUTES.STUDENT_DASHBOARD);
     } catch (err) {
-      setError(err.response?.data?.message || 'Une erreur est survenue');
+      console.error('Erreur lors de la connexion:', err);
+      
+      if (err.response?.status === 401) {
+        setError('Email ou mot de passe incorrect. Veuillez réessayer.');
+      } else if (err.response?.status === 400) {
+        setError(err.response.data.message || 'Données de formulaire invalides');
+      } else if (err.response?.data?.message) {
+        setError(err.response.data.message);
+      } else if (err.message === 'Network Error') {
+        setError('Impossible de se connecter au serveur. Vérifiez votre connexion internet.');
+      } else {
+        setError('Une erreur est survenue. Veuillez réessayer plus tard.');
+      }
+      
+      setLoading(false);
     }
   };
 
@@ -107,19 +150,37 @@ const Login = () => {
             <button
               type="button"
               onClick={(e) => handleSubmit(e, 'student')}
-              className="w-full py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+              disabled={loading}
+              className={`w-full py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white ${
+                loading ? 'bg-green-400' : 'bg-green-600 hover:bg-green-700'
+              } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500`}
             >
-              Connexion Étudiant
+              {loading ? 'Connexion...' : 'Connexion Étudiant'}
             </button>
             <button
               type="button"
               onClick={(e) => handleSubmit(e, 'admin')}
-              className="w-full py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+              disabled={loading}
+              className={`w-full py-2 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white ${
+                loading ? 'bg-blue-400' : 'bg-blue-600 hover:bg-blue-700'
+              } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500`}
             >
-              Connexion Admin
+              {loading ? 'Connexion...' : 'Connexion Admin'}
             </button>
           </div>
         </form>
+        
+        <div className="mt-6 text-center text-sm">
+          <p className="text-gray-600">
+            Informations de connexion pour test:
+          </p>
+          <p className="text-gray-600 mt-1">
+            <strong>Admin:</strong> admin@usms.ac.ma / adminpass
+          </p>
+          <p className="text-gray-600">
+            <strong>Étudiant:</strong> etudiant@usms.ac.ma / password
+          </p>
+        </div>
       </div>
     </div>
   );

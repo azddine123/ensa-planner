@@ -3,7 +3,8 @@ const mongoose = require('mongoose');
 const groupSchema = new mongoose.Schema({
   name: {
     type: String,
-    required: true
+    required: true,
+    trim: true
   },
   description: {
     type: String
@@ -16,6 +17,18 @@ const groupSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Task'
   }],
+  events: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Event'
+  }],
+  documents: [{
+    name: String,
+    url: String,
+    uploadedAt: {
+      type: Date,
+      default: Date.now
+    }
+  }],
   createdBy: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
@@ -24,6 +37,10 @@ const groupSchema = new mongoose.Schema({
 }, {
   timestamps: true
 });
+
+// Index pour améliorer les performances des requêtes
+groupSchema.index({ name: 1 });
+groupSchema.index({ members: 1 });
 
 const Group = mongoose.model('Group', groupSchema);
 

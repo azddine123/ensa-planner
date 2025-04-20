@@ -74,7 +74,7 @@ exports.getTask = async (req, res) => {
     res.json(task);
   } catch (error) {
     console.error('Erreur lors de la récupération de la tâche:', error);
-    res.status(500).json({ message: 'Erreur lors de la récupération de la tâche' });
+    res.status(500).json({ message: 'Erreur lors de la récupération de la tâche', error: error.message });
   }
 };
 
@@ -106,7 +106,7 @@ exports.updateTask = async (req, res) => {
     res.json(task);
   } catch (error) {
     console.error('Erreur lors de la mise à jour de la tâche:', error);
-    res.status(500).json({ message: 'Erreur lors de la mise à jour de la tâche' });
+    res.status(500).json({ message: 'Erreur lors de la mise à jour de la tâche', error: error.message });
   }
 };
 
@@ -125,7 +125,7 @@ exports.deleteTask = async (req, res) => {
     res.json({ message: 'Tâche supprimée avec succès' });
   } catch (error) {
     console.error('Erreur lors de la suppression de la tâche:', error);
-    res.status(500).json({ message: 'Erreur lors de la suppression de la tâche' });
+    res.status(500).json({ message: 'Erreur lors de la suppression de la tâche', error: error.message });
   }
 };
 
@@ -133,7 +133,7 @@ exports.deleteTask = async (req, res) => {
 exports.getTaskStats = async (req, res) => {
   try {
     const stats = await Task.aggregate([
-      { $match: { student: req.user._id } },
+      { $match: { student: req.user.id } },
       {
         $group: {
           _id: '$status',
@@ -143,7 +143,7 @@ exports.getTaskStats = async (req, res) => {
     ]);
 
     const overdueTasks = await Task.find({
-      student: req.user._id,
+      student: req.user.id,
       dueDate: { $lt: new Date() },
       status: { $ne: 'completed' }
     }).count();
@@ -154,6 +154,6 @@ exports.getTaskStats = async (req, res) => {
     });
   } catch (error) {
     console.error('Erreur lors de la récupération des statistiques:', error);
-    res.status(500).json({ message: 'Erreur lors de la récupération des statistiques' });
+    res.status(500).json({ message: 'Erreur lors de la récupération des statistiques', error: error.message });
   }
 }; 
