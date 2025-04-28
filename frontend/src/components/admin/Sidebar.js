@@ -45,13 +45,32 @@ const Sidebar = () => {
     <div className={`bg-white h-screen fixed left-0 top-0 shadow-lg transition-all duration-300 ease-in-out ${collapsed ? 'w-20' : 'w-64'} z-20`}>
       {/* En-tête */}
       <div className="p-5 border-b border-gray-100 flex items-center justify-between">
-        <div className={`transition-opacity duration-200 ${collapsed ? 'opacity-0 w-0' : 'opacity-100'}`}>
-          <h2 className="text-xl font-bold text-gray-800">ENSA Planner</h2>
-          <p className="text-sm text-gray-600">Administration</p>
+        <div className={`flex items-center transition-opacity duration-200 ${collapsed ? 'opacity-0 w-0' : 'opacity-100'}`}>
+          <img 
+            className="h-8 w-8 rounded-full mr-2"
+            src="/images/ENSA-BENI-MELLAL-LOGO.png" 
+            alt="ENSA Logo" 
+            onError={(e) => {
+              e.target.onerror = null; 
+              e.target.src = "https://ui-avatars.com/api/?name=ENSA&background=0D8ABC&color=fff";
+            }}
+          />
+          <div>
+            <h2 className="text-xl font-bold text-gray-800">ENSA Planner</h2>
+            <p className="text-sm text-gray-600">Administration</p>
+          </div>
         </div>
         {collapsed && (
           <div className="w-full flex justify-center">
-            <span className="text-xl font-bold text-blue-600">EP</span>
+            <img 
+              className="h-8 w-8 rounded-full"
+              src="/images/ENSA-BENI-MELLAL-LOGO.png" 
+              alt="ENSA Logo" 
+              onError={(e) => {
+                e.target.onerror = null; 
+                e.target.src = "https://ui-avatars.com/api/?name=ENSA&background=0D8ABC&color=fff";
+              }}
+            />
           </div>
         )}
         <button 

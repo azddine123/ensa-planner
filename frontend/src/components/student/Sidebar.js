@@ -72,9 +72,20 @@ const Sidebar = () => {
 
   return (
     <div className="bg-white h-full w-64 fixed left-0 top-0 shadow-lg">
-      <div className="p-4 border-b">
-        <h2 className="text-2xl font-bold text-gray-800">ENSA Planner</h2>
-        <p className="text-sm text-gray-600">Espace Étudiant</p>
+      <div className="p-4 border-b flex items-center">
+        <img 
+          className="h-8 w-8 rounded-full mr-2"
+          src="/images/ENSA-BENI-MELLAL-LOGO.png" 
+          alt="ENSA Logo" 
+          onError={(e) => {
+            e.target.onerror = null; 
+            e.target.src = "https://ui-avatars.com/api/?name=ENSA&background=0D8ABC&color=fff";
+          }}
+        />
+        <div>
+          <h2 className="text-2xl font-bold text-gray-800">ENSA Planner</h2>
+          <p className="text-sm text-gray-600">Espace Étudiant</p>
+        </div>
       </div>
       <nav className="mt-6">
         {menuItems.map((item, index) => (
