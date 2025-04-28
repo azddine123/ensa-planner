@@ -7,6 +7,7 @@ const path = require('path');
 // Import des routes
 const authRoutes = require('./routes/auth');
 const taskRoutes = require('./routes/taskRoutes');
+const groupRoutes = require('./routes/groupRoutes');
 
 // Configuration des variables d'environnement
 dotenv.config();
@@ -30,6 +31,7 @@ mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/ensa-plan
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/tasks', taskRoutes);
+app.use('/api/groups', groupRoutes);
 
 // Route de base
 app.get('/', (req, res) => {
