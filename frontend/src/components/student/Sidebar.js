@@ -92,6 +92,25 @@ const Sidebar = () => {
           </Link>
         ))}
       </nav>
+      
+      {/* Pied de page avec logo */}
+      <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-100">
+        <div className="flex items-center">
+          <img 
+            className="h-10 w-10 rounded-full border-2 border-gray-200"
+            src="/images/ENSA-BENI-MELLAL-LOGO.png" 
+            alt="ENSA Logo" 
+            onError={(e) => {
+              e.target.onerror = null; 
+              e.target.src = "https://ui-avatars.com/api/?name=ENSA&background=0D8ABC&color=fff";
+            }}
+          />
+          <div className="ml-3">
+            <p className="text-sm font-medium text-gray-800">École Nationale</p>
+            <p className="text-xs text-gray-500">Sciences Appliquées</p>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
